@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthService } from '../../../core/services/auth.service';
 
@@ -14,7 +14,13 @@ export class LoginComponent {
   private readonly fb = inject(FormBuilder);
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly translate = inject(TranslateService);
+
+  // Only same-site paths are honoured, so a crafted ?returnUrl can't bounce anyone off-site.
+  private readonly returnUrl = LoginComponent.safeReturnUrl(
+    this.route.snapshot.queryParamMap.get('returnUrl')
+  );
 
   readonly loading = signal(false);
   readonly errorMessage = signal<string | null>(null);
@@ -47,7 +53,7 @@ export class LoginComponent {
       next: (response) => {
         this.loading.set(false);
         if (response.object) {
-          this.router.navigateByUrl('/dashboard');
+          this.router.navigateByUrl(this.returnUrl);
         } else {
           this.errorMessage.set(response.message);
         }
@@ -57,5 +63,9 @@ export class LoginComponent {
         this.errorMessage.set(err?.error?.message ?? this.translate.instant('auth.loginFailed'));
       }
     });
+  }
+
+  private static safeReturnUrl(candidate: string | null): string {
+    return candidate?.startsWith('/') && !candidate.startsWith('//') ? candidate : '/dashboard';
   }
 }
