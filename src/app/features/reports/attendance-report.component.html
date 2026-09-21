@@ -1,0 +1,46 @@
+<div class="card-header">
+  <h2>{{ 'reports.attendanceTitle' | translate }}</h2>
+  <div class="toolbar">
+    <button type="button" class="btn btn-secondary" (click)="print()">{{ 'common.print' | translate }}</button>
+    <button type="button" class="btn btn-primary" [disabled]="exportingPdf()" (click)="exportPdf()">
+      {{ (exportingPdf() ? 'common.exportingPdf' : 'common.exportPdf') | translate }}
+    </button>
+  </div>
+</div>
+
+<div class="card">
+  <div class="toolbar" style="margin-bottom: 1rem;">
+    <select [(ngModel)]="year" (ngModelChange)="load()">
+      @for (y of [year() - 1, year(), year() + 1]; track y) {
+        <option [ngValue]="y">{{ y }}</option>
+      }
+    </select>
+    <select [(ngModel)]="month" (ngModelChange)="load()">
+      @for (m of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]; track m) {
+        <option [ngValue]="m">{{ m }}</option>
+      }
+    </select>
+    <select [(ngModel)]="departmentId" (ngModelChange)="load()">
+      <option [ngValue]="null">{{ 'common.allDepartments' | translate }}</option>
+      @for (d of departments(); track d.id) {
+        <option [ngValue]="d.id">{{ d.name }}</option>
+      }
+    </select>
+  </div>
+
+  @if (loading()) {
+    <div class="loading-row">{{ 'common.loading' | translate }}</div>
+  } @else if (rows().length === 0) {
+    <div class="empty-state">{{ 'reports.noDataPeriod' | translate }}</div>
+  } @else {
+    <ag-grid-angular
+      style="height: 65vh; min-height: 320px;"
+      [theme]="theme"
+      [columnDefs]="colDefs()"
+      [defaultColDef]="defaultColDef"
+      [rowData]="rows()"
+      [enableRtl]="language.direction() === 'rtl'"
+      (gridReady)="onGridReady($event)"
+    />
+  }
+</div>

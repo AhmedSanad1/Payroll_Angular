@@ -1,0 +1,52 @@
+<div class="card-header">
+  <h2>{{ 'payroll.title' | translate }}</h2>
+</div>
+
+<div class="card" style="max-width: 480px;">
+  <h3>{{ 'payroll.generateMonth' | translate }}</h3>
+  <div class="toolbar">
+    <select [(ngModel)]="generateYear">
+      @for (y of [generateYear() - 1, generateYear(), generateYear() + 1]; track y) {
+        <option [ngValue]="y">{{ y }}</option>
+      }
+    </select>
+    <select [(ngModel)]="generateMonth">
+      @for (m of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]; track m) {
+        <option [ngValue]="m">{{ m }}</option>
+      }
+    </select>
+    <button type="button" class="btn btn-primary" [disabled]="generating()" (click)="generate()">
+      {{ (generating() ? 'payroll.generating' : 'payroll.generate') | translate }}
+    </button>
+  </div>
+  <p style="color: var(--color-text-muted); font-size: 0.8rem; margin-top: 0.5rem;">
+    {{ 'payroll.generateHint' | translate }}
+  </p>
+</div>
+
+<div class="card">
+  @if (loading()) {
+    <div class="loading-row">{{ 'common.loading' | translate }}</div>
+  } @else if (items().length === 0) {
+    <div class="empty-state">{{ 'payroll.empty' | translate }}</div>
+  } @else {
+    <ag-grid-angular
+      [theme]="theme"
+      [columnDefs]="colDefs()"
+      [defaultColDef]="defaultColDef"
+      [rowData]="items()"
+      [enableRtl]="language.direction() === 'rtl'"
+      domLayout="autoHeight"
+      (gridReady)="onGridReady($event)"
+    />
+
+    <app-pagination
+      [pageNumber]="pageNumber()"
+      [totalPages]="totalPages()"
+      [totalCount]="totalCount()"
+      [hasPreviousPage]="hasPreviousPage()"
+      [hasNextPage]="hasNextPage()"
+      (pageChange)="goToPage($event)"
+    />
+  }
+</div>

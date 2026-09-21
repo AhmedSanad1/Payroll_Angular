@@ -1,0 +1,139 @@
+<div class="card-header">
+  <h2>{{ 'payroll.runTitle' | translate }}</h2>
+  <a class="btn btn-secondary" routerLink="/payroll">{{ 'common.backToList' | translate }}</a>
+</div>
+
+@if (loading()) {
+  <div class="loading-row">{{ 'common.loading' | translate }}</div>
+} @else if (run(); as r) {
+  <div class="kpi-cards">
+    <div class="kpi-card">
+      <div class="kpi-value">{{ r.periodYear }}-{{ r.periodMonth.toString().padStart(2, '0') }}</div>
+      <div class="kpi-label">
+        {{ 'common.period' | translate }} ·
+        <span class="badge" [class.badge-draft]="r.status === PayrollRunStatus.Draft" [class.badge-approved]="r.status === PayrollRunStatus.Approved">
+          {{ (r.status === PayrollRunStatus.Approved ? 'common.approved' : 'common.draft') | translate }}
+        </span>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-value">{{ r.employeeCount }}</div>
+      <div class="kpi-label">{{ 'common.employees' | translate }}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-value money">{{ r.totalNetSalary | number: '1.2-2' }}</div>
+      <div class="kpi-label">{{ 'payroll.totalNetSalary' | translate }}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-value money">{{ r.totalDeptIncentive | number: '1.2-2' }}</div>
+      <div class="kpi-label">{{ 'payroll.totalDeptIncentive' | translate }}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-value money">{{ r.totalServiceIncentive | number: '1.2-2' }}</div>
+      <div class="kpi-label">{{ 'payroll.totalServiceIncentive' | translate }}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-value money">{{ r.totalAttendanceAdjustment | number: '1.2-2' }}</div>
+      <div class="kpi-label">{{ 'payroll.totalAttendanceAdjustment' | translate }}</div>
+    </div>
+  </div>
+
+  @if (r.status === PayrollRunStatus.Draft) {
+    <div class="card">
+      <button type="button" class="btn btn-primary" [disabled]="approving()" (click)="approve()">
+        {{ (approving() ? 'payroll.approving' : 'payroll.approveRun') | translate }}
+      </button>
+      <span style="color: var(--color-text-muted); font-size: 0.82rem; margin-inline-start: 0.75rem;">
+        {{ 'payroll.approveHint' | translate }}
+      </span>
+    </div>
+  }
+}
+
+<div class="card">
+  <div class="toolbar" style="margin-bottom: 1rem;">
+    <input
+      type="text"
+      [placeholder]="'payroll.searchEmployee' | translate"
+      [(ngModel)]="search"
+      (keyup.enter)="applyFilters()"
+      style="padding: 0.5rem 0.65rem; border: 1px solid var(--color-border); border-radius: 6px; min-width: 220px;"
+    />
+    <select [(ngModel)]="departmentId" (ngModelChange)="applyFilters()">
+      <option [ngValue]="null">{{ 'common.allDepartments' | translate }}</option>
+      @for (d of departments(); track d.id) {
+        <option [ngValue]="d.id">{{ d.name }}</option>
+      }
+    </select>
+    <button type="button" class="btn btn-secondary btn-sm" (click)="applyFilters()">{{ 'common.search' | translate }}</button>
+  </div>
+
+  @if (itemsLoading()) {
+    <div class="loading-row">{{ 'common.loading' | translate }}</div>
+  } @else if (items().length === 0) {
+    <div class="empty-state">{{ 'payroll.itemsEmpty' | translate }}</div>
+  } @else {
+    <ag-grid-angular
+      [theme]="theme"
+      [columnDefs]="colDefs()"
+      [defaultColDef]="defaultColDef"
+      [rowData]="items()"
+      [enableRtl]="language.direction() === 'rtl'"
+      domLayout="autoHeight"
+      (gridReady)="onGridReady($event)"
+    />
+
+    <app-pagination
+      [pageNumber]="pageNumber()"
+      [totalPages]="totalPages()"
+      [totalCount]="totalCount()"
+      [hasPreviousPage]="hasPreviousPage()"
+      [hasNextPage]="hasNextPage()"
+      (pageChange)="goToPage($event)"
+    />
+  }
+</div>
+
+@if (selectedItem(); as item) {
+  <div class="dialog-backdrop">
+    <div class="dialog" style="width: 440px;" (click)="$event.stopPropagation()">
+      <h3>{{ item.employeeName }}</h3>
+      <table class="data-table">
+        <tbody>
+          <tr>
+            <td>{{ 'common.baseSalary' | translate }}</td>
+            <td class="money text-end">{{ item.baseSalary | number: '1.2-2' }}</td>
+          </tr>
+          <tr>
+            <td>{{ 'payroll.deptIncentive' | translate: { percent: item.deptIncentivePercent } }}</td>
+            <td class="money text-end">{{ item.deptIncentiveAmount | number: '1.2-2' }}</td>
+          </tr>
+          <tr>
+            <td>{{ 'payroll.serviceIncentive' | translate: { percent: item.serviceIncentivePercent, years: item.serviceYears } }}</td>
+            <td class="money text-end">{{ item.serviceIncentiveAmount | number: '1.2-2' }}</td>
+          </tr>
+          <tr>
+            <td>
+              @if (item.attendanceAdjustmentType === AttendanceAdjustmentType.Bonus) {
+                {{ 'payroll.attendanceBonus' | translate }}
+              } @else if (item.attendanceAdjustmentType === AttendanceAdjustmentType.Deduction) {
+                {{ 'payroll.attendanceDeduction' | translate }}
+              } @else {
+                {{ 'payroll.attendanceNone' | translate }}
+              }
+              {{ 'payroll.attendanceDetail' | translate: { percent: item.attendancePercent, days: item.absentDays } }}
+            </td>
+            <td class="money text-end">{{ item.attendanceAmount | number: '1.2-2' }}</td>
+          </tr>
+          <tr>
+            <td><strong>{{ 'common.netSalary' | translate }}</strong></td>
+            <td class="money text-end"><strong>{{ item.netSalary | number: '1.2-2' }}</strong></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="dialog-actions">
+        <button type="button" class="btn btn-secondary" (click)="closeBreakdown()">{{ 'common.close' | translate }}</button>
+      </div>
+    </div>
+  </div>
+}

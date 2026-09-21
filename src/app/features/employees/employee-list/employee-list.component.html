@@ -1,0 +1,54 @@
+<div class="card-header">
+  <h2>{{ 'employees.title' | translate }}</h2>
+  <a class="btn btn-primary" routerLink="/employees/new">{{ 'employees.new' | translate }}</a>
+</div>
+
+<div class="card">
+  <div class="toolbar" style="margin-bottom: 1rem;">
+    <input
+      type="text"
+      [placeholder]="'employees.searchPlaceholder' | translate"
+      [(ngModel)]="search"
+      (keyup.enter)="applyFilters()"
+      style="padding: 0.5rem 0.65rem; border: 1px solid var(--color-border); border-radius: 6px; min-width: 220px;"
+    />
+    <select [(ngModel)]="departmentId" (ngModelChange)="applyFilters()">
+      <option [ngValue]="null">{{ 'common.allDepartments' | translate }}</option>
+      @for (d of departments(); track d.id) {
+        <option [ngValue]="d.id">{{ d.name }}</option>
+      }
+    </select>
+    <select [(ngModel)]="jobGradeId" (ngModelChange)="applyFilters()">
+      <option [ngValue]="null">{{ 'common.allGrades' | translate }}</option>
+      @for (g of jobGrades(); track g.id) {
+        <option [ngValue]="g.id">{{ g.nameEn }}</option>
+      }
+    </select>
+    <button type="button" class="btn btn-secondary btn-sm" (click)="applyFilters()">{{ 'common.search' | translate }}</button>
+  </div>
+
+  @if (loading()) {
+    <div class="loading-row">{{ 'common.loading' | translate }}</div>
+  } @else if (items().length === 0) {
+    <div class="empty-state">{{ 'employees.empty' | translate }}</div>
+  } @else {
+    <ag-grid-angular
+      [theme]="theme"
+      [columnDefs]="colDefs()"
+      [defaultColDef]="defaultColDef"
+      [rowData]="items()"
+      [enableRtl]="language.direction() === 'rtl'"
+      domLayout="autoHeight"
+      (gridReady)="onGridReady($event)"
+    />
+
+    <app-pagination
+      [pageNumber]="pageNumber()"
+      [totalPages]="totalPages()"
+      [totalCount]="totalCount()"
+      [hasPreviousPage]="hasPreviousPage()"
+      [hasNextPage]="hasNextPage()"
+      (pageChange)="goToPage($event)"
+    />
+  }
+</div>
