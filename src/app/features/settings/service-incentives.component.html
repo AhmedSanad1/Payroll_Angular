@@ -1,0 +1,46 @@
+<div class="card-header">
+  <h2>{{ 'settings.tiers.title' | translate }}</h2>
+  <button type="button" class="btn btn-primary" (click)="openCreate()">{{ 'settings.tiers.new' | translate }}</button>
+</div>
+
+<div class="card">
+  @if (loading()) {
+    <div class="loading-row">{{ 'common.loading' | translate }}</div>
+  } @else if (tiers().length === 0) {
+    <div class="empty-state">{{ 'settings.tiers.empty' | translate }}</div>
+  } @else {
+    <ag-grid-angular
+      [theme]="theme"
+      [columnDefs]="colDefs()"
+      [defaultColDef]="defaultColDef"
+      [rowData]="tiers()"
+      [enableRtl]="language.direction() === 'rtl'"
+      domLayout="autoHeight"
+      (gridReady)="onGridReady($event)"
+    />
+  }
+</div>
+
+@if (dialogOpen()) {
+  <div class="dialog-backdrop">
+    <div class="dialog" (click)="$event.stopPropagation()">
+      <h3>{{ (editingId() ? 'settings.tiers.editTitle' : 'settings.tiers.newTitle') | translate }}</h3>
+      <form [formGroup]="form" (ngSubmit)="save()">
+        <div class="form-field">
+          <label for="minYearsExceeded">{{ 'settings.tiers.minYearsExceeded' | translate }}</label>
+          <input id="minYearsExceeded" type="number" formControlName="minYearsExceeded" />
+        </div>
+        <div class="form-field">
+          <label for="percent">{{ 'common.percent' | translate }}</label>
+          <input id="percent" type="number" step="0.01" formControlName="percent" />
+        </div>
+        <div class="dialog-actions">
+          <button type="button" class="btn btn-secondary" (click)="closeDialog()">{{ 'common.cancel' | translate }}</button>
+          <button type="submit" class="btn btn-primary" [disabled]="saving()">
+            {{ (saving() ? 'common.saving' : 'common.save') | translate }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

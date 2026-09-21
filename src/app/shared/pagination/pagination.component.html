@@ -1,0 +1,10 @@
+<div class="pagination">
+  <span>{{ totalCount() }} {{ 'common.total' | translate }}</span>
+  <div class="toolbar">
+    <button type="button" class="btn btn-secondary btn-sm" [disabled]="!hasPreviousPage()" (click)="previous()">
+      {{ 'common.prev' | translate }}
+    </button>
+    <span>{{ 'common.page' | translate: { page: pageNumber(), total: totalPages() || 1 } }}</span>
+    <button type="button" class="btn btn-secondary btn-sm" [disabled]="!hasNextPage()" (click)="next()">{{ 'common.next' | translate }}</button>
+  </div>
+</div>

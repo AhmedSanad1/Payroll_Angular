@@ -1,0 +1,60 @@
+<h2>{{ 'settings.calculation.title' | translate }}</h2>
+
+<div class="card" style="max-width: 640px;">
+  @if (loading()) {
+    <div class="loading-row">{{ 'common.loading' | translate }}</div>
+  } @else {
+    <div class="form-field">
+      <label>
+        <input
+          type="radio"
+          name="mode"
+          [checked]="mode() === PayrollCalculationMode.Additive"
+          (change)="select(PayrollCalculationMode.Additive)"
+        />
+        {{ 'settings.calculation.additive' | translate }}
+      </label>
+    </div>
+    <div class="form-field">
+      <label>
+        <input
+          type="radio"
+          name="mode"
+          [checked]="mode() === PayrollCalculationMode.Compound"
+          (change)="select(PayrollCalculationMode.Compound)"
+        />
+        {{ 'settings.calculation.compound' | translate }}
+      </label>
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="btn btn-primary" [disabled]="saving()" (click)="save()">
+        {{ (saving() ? 'common.saving' : 'common.save') | translate }}
+      </button>
+    </div>
+  }
+</div>
+
+<div class="card" style="max-width: 640px;">
+  <h3>{{ 'settings.calculation.liveExample' | translate }}</h3>
+  <p style="color: var(--color-text-muted);">{{ 'settings.calculation.exampleHint' | translate }}</p>
+
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>{{ 'settings.calculation.mode' | translate }}</th>
+        <th>{{ 'common.netSalary' | translate }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>{{ 'settings.calculation.additiveLabel' | translate }} {{ mode() === PayrollCalculationMode.Additive ? ('common.selected' | translate) : '' }}</td>
+        <td class="money">{{ exampleAdditive().net | number: '1.2-2' }}</td>
+      </tr>
+      <tr>
+        <td>{{ 'settings.calculation.compoundLabel' | translate }} {{ mode() === PayrollCalculationMode.Compound ? ('common.selected' | translate) : '' }}</td>
+        <td class="money">{{ exampleCompound().net | number: '1.2-2' }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

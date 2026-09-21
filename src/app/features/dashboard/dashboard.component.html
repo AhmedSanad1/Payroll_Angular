@@ -1,0 +1,40 @@
+<h2>{{ 'dashboard.title' | translate }}</h2>
+
+<div class="kpi-cards">
+  <div class="kpi-card">
+    <div class="kpi-value">{{ employeeCount() }}</div>
+    <div class="kpi-label">{{ 'dashboard.activeEmployees' | translate }}</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-value money">
+      @if (lastApprovedRunTotal(); as total) {
+        {{ total | number: '1.2-2' }}
+      } @else {
+        —
+      }
+    </div>
+    <div class="kpi-label">
+      {{ 'dashboard.lastApprovedRunTotal' | translate }} @if (lastApprovedRunLabel(); as label) {
+        ({{ label }})
+      }
+    </div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-value">{{ absentDaysThisMonth() }}</div>
+    <div class="kpi-label">{{ 'dashboard.absenceDaysThisMonth' | translate }}</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <h3>{{ 'dashboard.netSalaryByDepartment' | translate }}</h3>
+  </div>
+
+  @if (loading()) {
+    <div class="loading-row">{{ 'common.loading' | translate }}</div>
+  } @else if (chartLabels().length === 0) {
+    <div class="empty-state">{{ 'dashboard.noApprovedRun' | translate }}</div>
+  } @else {
+    <apx-chart [series]="chartSeries()" [chart]="chart" [xaxis]="xaxis" [colors]="['#2f6feb']" />
+  }
+</div>

@@ -1,0 +1,67 @@
+<div class="app-shell">
+  <aside class="app-sidebar">
+    <div class="brand">
+      <span class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="5" width="20" height="14" rx="2" />
+          <circle cx="12" cy="12" r="3" />
+        </svg>
+      </span>
+      <span>{{ 'common.appName' | translate }}</span>
+    </div>
+
+    <div class="nav-section">{{ 'nav.main' | translate }}</div>
+    <ul class="nav-list">
+      @for (item of menu; track item.route) {
+        <li>
+          <a class="nav-link" [routerLink]="item.route" routerLinkActive="active">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path [attr.d]="item.icon" /></svg>
+            <span>{{ item.labelKey | translate }}</span>
+          </a>
+        </li>
+      }
+    </ul>
+
+    <div class="nav-section">{{ 'nav.settings' | translate }}</div>
+    <ul class="nav-list">
+      @for (item of settingsMenu; track item.route) {
+        <li>
+          <a class="nav-link" [routerLink]="item.route" routerLinkActive="active">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path [attr.d]="item.icon" /></svg>
+            <span>{{ item.labelKey | translate }}</span>
+          </a>
+        </li>
+      }
+    </ul>
+
+    <div class="nav-section">{{ 'nav.reports' | translate }}</div>
+    <ul class="nav-list">
+      @for (item of reportsMenu; track item.route) {
+        <li>
+          <a class="nav-link" [routerLink]="item.route" routerLinkActive="active">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path [attr.d]="item.icon" /></svg>
+            <span>{{ item.labelKey | translate }}</span>
+          </a>
+        </li>
+      }
+    </ul>
+  </aside>
+
+  <header class="app-header">
+    <div class="user-chip">
+      <span class="user-avatar">{{ initials() }}</span>
+      <span>{{ auth.username() }}</span>
+    </div>
+    <button type="button" class="btn btn-secondary btn-sm" (click)="toggleLanguage()">
+      {{ language.language() === 'ar' ? 'EN' : 'AR' }}
+    </button>
+    <button type="button" class="btn btn-secondary btn-sm" (click)="logout()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><path d="M16 17l5-5-5-5" /><path d="M21 12H9" /></svg>
+      {{ 'common.logout' | translate }}
+    </button>
+  </header>
+
+  <main class="app-main">
+    <router-outlet />
+  </main>
+</div>
